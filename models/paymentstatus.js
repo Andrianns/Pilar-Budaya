@@ -1,7 +1,5 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class PaymentStatus extends Model {
     /**
@@ -11,17 +9,22 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      PaymentStatus.belongsTo(models.User, { foreignKey: 'userId' });
     }
   }
-  PaymentStatus.init({
-    userId: DataTypes.INTEGER,
-    paymentPeriod: DataTypes.STRING,
-    uploadDate: DataTypes.DATE,
-    amount: DataTypes.INTEGER,
-    paymentStatus: DataTypes.STRING
-  }, {
-    sequelize,
-    modelName: 'PaymentStatus',
-  });
+  PaymentStatus.init(
+    {
+      userId: DataTypes.INTEGER,
+      paymentPeriod: DataTypes.STRING,
+      uploadDate: DataTypes.DATE,
+      amount: DataTypes.INTEGER,
+      paymentStatus: DataTypes.STRING,
+      proofPath: DataTypes.STRING,
+    },
+    {
+      sequelize,
+      modelName: 'PaymentStatus',
+    }
+  );
   return PaymentStatus;
 };

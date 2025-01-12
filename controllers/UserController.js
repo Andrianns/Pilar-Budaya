@@ -1,6 +1,7 @@
-const { User } = require('../models');
+const { User, PaymentStatus } = require('../models');
 const { compareHash } = require('../helper/bcrypt');
 const { createToken } = require('../helper/jwt');
+const paymentstatus = require('../models/paymentstatus');
 class UserController {
   static async register(req, res, next) {
     const { fullName, username, email, phoneNumber, birthDate, password } =
@@ -69,6 +70,37 @@ class UserController {
       next(error);
     }
   }
-  static;
+  static async getUserById(req, res, next) {
+    try {
+      const { userId } = req.params; // Ambil userId dari parameter request
+
+      // Query User dengan relasi ke PaymentStatus
+      const user = await User.findByPk(userId, {
+        include: {
+          model: PaymentStatus,
+        },
+      });
+
+      // Jika user tidak ditemukan
+      if (!user) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+
+      // Response data
+      res.status(200).json({
+        message: 'Success',
+        data: {
+          id: user.id,
+          fullName: user.fullName,
+          username: user.username,
+          email: user.email,
+          payments: user.PaymentStatuses, // Relasi dengan PaymentStatus
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      next(error);
+    }
+  }
 }
 module.exports = UserController;

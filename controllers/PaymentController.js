@@ -45,22 +45,26 @@ const uploadPaymentProof = async (req, res) => {
       if (!user) {
         return res.status(404).json({ error: 'User tidak ditemukan' });
       }
-
+      if (!req.file) {
+        return res
+          .status(400)
+          .json({ error: 'Payment proof file is required.' });
+      }
       // Simpan data ke database
       const payment = await PaymentStatus.create({
-        paymentPeriod,
+        paymentPeriod: paymentPeriod,
         uploadDate: new Date(),
-        amount: null, // Opsional, bisa diisi dari frontend jika diperlukan
+        amount: 500, // Opsional, bisa diisi dari frontend jika diperlukan
         paymentStatus: 'Pending', // Default status pembayaran
         userId: user.id,
         proofPath: `/uploads/${req.file.filename}`, // Path file yang diunggah
       });
-
       res.status(201).json({
         message: 'Bukti pembayaran berhasil diunggah',
         data: payment,
       });
     } catch (error) {
+      console.log(error);
       res.status(500).json({ error: 'Terjadi kesalahan pada server' });
     }
   });
