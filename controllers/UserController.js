@@ -3,16 +3,16 @@ const { compareHash } = require('../helper/bcrypt');
 const { createToken } = require('../helper/jwt');
 class UserController {
   static async register(req, res, next) {
-    const {
-      fullName,
-      username,
-      email,
-      phoneNumber,
-      birthDate,
-      password,
-      paymentProof,
-    } = req.body;
+    const { fullName, username, email, phoneNumber, birthDate, password } =
+      req.body;
     try {
+      const formattedBirthDate = new Date(birthDate);
+      if (isNaN(formattedBirthDate)) {
+        throw {
+          status: 400,
+          message: 'Invalid birthDate format. Use YYYY-MM-DD.',
+        };
+      }
       let data = await User.create({
         fullName,
         username,
@@ -20,10 +20,9 @@ class UserController {
         phoneNumber,
         birthDate,
         password,
-        paymentProof,
         role: 'Customer',
       });
-
+      const { role } = data;
       res.status(201).json({
         message: 'success register customer',
         data: {
@@ -34,6 +33,7 @@ class UserController {
         },
       });
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
@@ -70,5 +70,6 @@ class UserController {
       next(error);
     }
   }
+  static;
 }
 module.exports = UserController;
