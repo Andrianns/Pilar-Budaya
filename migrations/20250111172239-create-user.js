@@ -17,6 +17,7 @@ module.exports = {
       },
       email: {
         type: Sequelize.STRING,
+        unique: true,
       },
       phoneNumber: {
         type: Sequelize.STRING,

@@ -46,7 +46,6 @@ class UserController {
           email: email,
         },
       });
-
       if (!findUser) {
         throw { name: 'Invalid email/password' };
       }

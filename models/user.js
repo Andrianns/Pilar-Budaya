@@ -1,5 +1,8 @@
 'use strict';
 const { Model } = require('sequelize');
+const { hashPassword } = require('../helper/bcrypt');
+const { HTMLDateFormat } = require('../helper/dateFormat.js');
+
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -15,13 +18,36 @@ module.exports = (sequelize, DataTypes) => {
     {
       fullName: DataTypes.STRING,
       username: DataTypes.STRING,
-      email: DataTypes.STRING,
+      email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: {
+          msg: 'This email is already exists',
+        },
+        validate: {
+          notNull: {
+            msg: 'Email cannot be empty.',
+          },
+          notEmpty: {
+            msg: 'Email cannot be empty.',
+          },
+        },
+      },
       phoneNumber: DataTypes.STRING,
       birthDate: DataTypes.DATE,
       password: DataTypes.STRING,
       role: DataTypes.STRING,
     },
+
     {
+      hooks: {
+        beforeCreate(instance, options) {
+          instance.password = hashPassword(instance.password);
+        },
+        beforeUpdate(instance, options) {
+          instance.password = hashPassword(instance.password);
+        },
+      },
       sequelize,
       modelName: 'User',
     }
