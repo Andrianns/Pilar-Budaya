@@ -2,6 +2,7 @@ const { User, PaymentStatus } = require('../models');
 const { compareHash } = require('../helper/bcrypt');
 const { createToken } = require('../helper/jwt');
 const paymentstatus = require('../models/paymentstatus');
+const { where } = require('sequelize');
 class UserController {
   static async register(req, res, next) {
     const { fullName, username, email, phoneNumber, birthDate, password } =
@@ -70,6 +71,29 @@ class UserController {
       next(error);
     }
   }
+
+  static async getAllUserCustomer(req, res, next) {
+    try {
+      const user = await User.findAll({
+        attributes: {
+          exclude: ['password', 'createdAt', 'updatedAt'],
+        },
+        where: {
+          role: 'Customer',
+        },
+      });
+      if (!user) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+      res.status(200).json({
+        message: 'Success',
+        data: user,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async getUserById(req, res, next) {
     try {
       const { userId } = req.params; // Ambil userId dari parameter request
@@ -78,6 +102,7 @@ class UserController {
       const user = await User.findByPk(userId, {
         include: {
           model: PaymentStatus,
+          attributes: { exclude: ['fileData'] }, // Mengecualikan kolom fileData
         },
       });
 

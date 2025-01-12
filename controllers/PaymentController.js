@@ -1,21 +1,12 @@
 const path = require('path');
 const multer = require('multer');
-const { User, PaymentStatus } = require('../models'); // Import model Sequelize
+const { User, PaymentStatus } = require('../models');
 
-// Setup multer untuk upload file
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Folder penyimpanan file
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname)); // Format nama file
-  },
-});
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // Maksimal ukuran file 10 MB
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const fileTypes = /jpeg|jpg|png|pdf/;
     const extName = fileTypes.test(
@@ -29,9 +20,8 @@ const upload = multer({
       cb(new Error('Hanya file JPG, PNG, atau PDF yang diperbolehkan'));
     }
   },
-}).single('paymentProof'); // "paymentProof" harus sesuai dengan nama field di form
+}).single('paymentProof');
 
-// Controller untuk handle upload
 const uploadPaymentProof = async (req, res) => {
   upload(req, res, async (err) => {
     if (err) {
@@ -39,8 +29,7 @@ const uploadPaymentProof = async (req, res) => {
     }
 
     try {
-      const { userId, paymentPeriod } = req.body; // Ambil data dari body request
-      // Validasi user
+      const { userId, paymentPeriod } = req.body;
       const user = await User.findByPk(userId);
       if (!user) {
         return res.status(404).json({ error: 'User tidak ditemukan' });
@@ -50,24 +39,88 @@ const uploadPaymentProof = async (req, res) => {
           .status(400)
           .json({ error: 'Payment proof file is required.' });
       }
-      // Simpan data ke database
+
       const payment = await PaymentStatus.create({
         paymentPeriod: paymentPeriod,
         uploadDate: new Date(),
-        amount: 500, // Opsional, bisa diisi dari frontend jika diperlukan
-        paymentStatus: 'Pending', // Default status pembayaran
+        amount: 150000,
+        paymentStatus: 'Pending',
         userId: user.id,
-        proofPath: `/uploads/${req.file.filename}`, // Path file yang diunggah
+        fileData: req.file.buffer,
       });
       res.status(201).json({
         message: 'Bukti pembayaran berhasil diunggah',
-        data: payment,
+        data: {
+          paymentPeriod: payment.paymentPeriod,
+          userId: payment.userId,
+          amount: payment.amount,
+          paymentStatus: payment.PaymentStatus,
+        },
       });
     } catch (error) {
-      console.log(error);
       res.status(500).json({ error: 'Terjadi kesalahan pada server' });
     }
   });
 };
 
-module.exports = { uploadPaymentProof };
+const getPaymentProofAsBase64 = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const payment = await PaymentStatus.findByPk(id);
+
+    if (!payment || !payment.fileData) {
+      return res.status(404).json({ error: 'Payment proof not found.' });
+    }
+
+    const base64File = payment.fileData.toString('base64');
+
+    const mimeType = payment.mimeType || 'application/octet-stream';
+
+    res.status(200).json({
+      message: 'Success Get Payment',
+      data: {
+        mimeType,
+        base64: base64File,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+};
+
+const updateStatusPayment = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    let { paymentStatus } = req.body;
+
+    const user = await User.findByPk(+userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    await PaymentStatus.update(
+      {
+        paymentStatus: paymentStatus,
+      },
+      { where: { userId }, individualHooks: true }
+    );
+    findUser = await User.findByPk(+userId, {
+      attributes: { exclude: ['createdAt', 'updatedAt', 'password'] },
+    });
+
+    res.status(200).json({
+      message: `Successfully updated user ${findUser.fullName}`,
+    });
+    // Response data
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  uploadPaymentProof,
+  updateStatusPayment,
+  getPaymentProofAsBase64,
+};

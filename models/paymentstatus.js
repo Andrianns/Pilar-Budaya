@@ -19,7 +19,14 @@ module.exports = (sequelize, DataTypes) => {
       uploadDate: DataTypes.DATE,
       amount: DataTypes.INTEGER,
       paymentStatus: DataTypes.STRING,
-      proofPath: DataTypes.STRING,
+      proofPath: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      fileData: {
+        type: DataTypes.BLOB('long'),
+        allowNull: true,
+      },
     },
     {
       sequelize,

@@ -1,12 +1,12 @@
 const router = require('express').Router();
 const authentication = require('../middleware/authentication');
 const userRouter = require('./user');
-const { uploadPaymentProof } = require('../controllers/PaymentController');
+const paymentRouter = require('./payment');
 
-router.post('/upload-payment', uploadPaymentProof);
 router.use('/user', userRouter);
+router.use('/payment', paymentRouter);
 
 //authentication
-router.use(authentication);
+// router.use(authentication);
 
 module.exports = router;
