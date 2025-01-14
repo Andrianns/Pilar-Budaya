@@ -19,6 +19,4 @@ app.listen(port, () => {
 });
 app.use(errorHandler);
 
-module.exports = (req, res) => {
-  app(req, res); // Menjalankan app Express di dalam fungsi Serverless
-};
+module.exports = app;
