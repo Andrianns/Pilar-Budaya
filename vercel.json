@@ -2,15 +2,15 @@
   "version": 2,
   "builds":[
     {
-      "src":"/routes/index.js",
+      "src":"app.js",
       "use":"@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/routes/index.js"
+      "dest": "/app.js"
     }
   ],
-  "installCommand": "npm install"
+  "installCommand": "npm install -g pg"
 }
