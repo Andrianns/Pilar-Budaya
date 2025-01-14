@@ -37,6 +37,10 @@ function errorHandler(error, req, res, next) {
     res.status(400).json({
       message: 'You have chosen this team ',
     });
+  } else if (error.name === 'Folder Not Found') {
+    res.status(404).json({
+      message: 'Folder Not Found',
+    });
   } else {
     res.status(500).json({
       message: 'Internal server error',

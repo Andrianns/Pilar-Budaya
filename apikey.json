@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "pilarbudaya",
+  "private_key_id": "93199e4a7c221b8625c0269c7d502d7f42b58f53",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDmnIZEJZG1q7Jo\ny63Yo58WWLD4gfDwRrS1CEwQhusYXW2Uw15OoBSyiFnsHxEZaWB0FGI4E92CjDjm\nom07UziHS/26UCkw5Ol2jso13Y3k13NGDVTuu+Uz6kTvgEBy9g8HQkHMa8Dj6Eiu\nKlD3YmYNQebeNX3LKBrj8QMIu4G611/qy6zfJgP0xqRBh37ltP0O3PRDBBEyaXGY\nfrIcbXIqNyuTWWjk4QMYdHBxH0zdjU4G73ksitp+2hLW5qiG9YAUs694P0bzf7rb\nlO+wrzxWY1qbM1vMtS5qiHKSrjEmUYQNfpFPT2eZ5W879jnznl0p7v18PVgh8j+6\nbYRRSKtbAgMBAAECggEAD8k8ekC+sOzicEC+N9uVNBedus94mZajMftENJEiEJiy\n8rOpRe5vgyDbVBwrdLJdT9cvXlF+YKopoPwStf20LdiDoRhxzxyrQuNy+Nsfpokh\n7nRSvyEtvhOs0oNmypfR1fhMWcXn9P+rG7dMRkr1ACQKYkDz27P1LiJUEQ52k+Lo\nawQrahNgdtEXUWkp3uXDRaNfa7D9tf8WTD53YzrNt5z4/DtQ55x/DKpbgR6gkVpQ\nlz/0y+lGycUJU+3KAumGMFjCz/gkoo9EZBJmay5kKy5IIj0TBREoTRUul2Ad/t2P\n8b6a+x3Ktj4PAySv7mbBomOEzUatB1wJP9SiMvnB+QKBgQD06974PhjEvrHK00gP\naD9EmGSFWqGQ+/2a9qWMzclO1v59tU9a2X5gM/EOlHyBGeVL8y45qUhVlvZK+xCl\n5AlQ90ukvtRyJJm3PE+GtaAViDCoPD7DkbrJRcXMvv7WxypuvaNuoqUQmBwC0Pms\n7rU5mFKTCOSt/wfBqeKIS1Z2MwKBgQDxCvKl8yIsv42LKeHoiPZ5ohVTl0k1/FNb\nixCST+fx5oMqiB7usS5vKMM8Khix9uf724xrt1STm/wTfIZXLl0m9ULJWUec6jq8\ndvnH5LSDs3h4x77BsPrUoeK9gEABL6oJ+8xfIg7y61uJcZQGuhfzE6V4TNuvk2e8\nqsKag/g+OQKBgQC+2EjO0LxGGn25mPbuooGiNsklLGD285RCuux3EidJ2rdFRxGF\nrjIOTosInGWDx6TnkJ81aRYnM1HJTWdEjLNBtuDnh5dNNf3dTQ5+3mnWPWAEx6T0\niUqt6UNe7nju7RTAY97Ep9HNY2l4PFRBD2SBc5LsZaKjfjUSEAmnwGSoBwKBgCqP\nuFC9IaetGx0bhBw/MuY/TGy6Jd82crGTWJW9LkN0ZGy6JFwZRQ2zsOWKuVmTM1sx\nZRYQBQsbW+NE9aOnOCOM4wISlaaLZVup1mkJZSZsJjWNb41b5q5s91BmuOZ8uBWT\nNH8H0IPsMvmN6IlXiqsNKQaY66GQ8ZxKupn1+3thAoGBAMax007C0j0zzWekjPi1\nrAYotwXFnEydtcbx75/CYImSlXYykKGDXU3FrBC1B3dCNyot55RNhXml//L6PIoo\nfD6CM13YE5K+95QfPlX4UU2qHSAPH027SnzRP6GlE9PYIZvCsv/pydTVq4ParBWw\nGTTEXh4Q9awSI2tRdA59VSic\n-----END PRIVATE KEY-----\n",
+  "client_email": "pilarbudaya@pilarbudaya.iam.gserviceaccount.com",
+  "client_id": "112371415524530423089",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/pilarbudaya%40pilarbudaya.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

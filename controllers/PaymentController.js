@@ -1,52 +1,61 @@
-const path = require('path');
-const multer = require('multer');
 const { User, PaymentStatus } = require('../models');
+const { google } = require('googleapis');
+const { upload } = require('../helper/upload');
+const { shareFile } = require('../helper/util');
+const {
+  authenticateGoogle,
+  bufferToStream,
+  ensureParentFolderExists,
+} = require('../helper/googleAuth');
 
-const storage = multer.memoryStorage();
-
-const upload = multer({
-  storage,
-  limits: { fileSize: 10 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const fileTypes = /jpeg|jpg|png|pdf/;
-    const extName = fileTypes.test(
-      path.extname(file.originalname).toLowerCase()
-    );
-    const mimeType = fileTypes.test(file.mimetype);
-
-    if (extName && mimeType) {
-      cb(null, true);
-    } else {
-      cb(new Error('Hanya file JPG, PNG, atau PDF yang diperbolehkan'));
-    }
-  },
-}).single('paymentProof');
-
-const uploadPaymentProof = async (req, res) => {
+const uploadPaymentProof = async (req, res, next) => {
   upload(req, res, async (err) => {
     if (err) {
       return res.status(400).json({ error: err.message });
     }
-
     try {
       const { userId, paymentPeriod } = req.body;
       const user = await User.findByPk(userId);
       if (!user) {
         return res.status(404).json({ error: 'User tidak ditemukan' });
       }
+
+      const drive = google.drive({
+        version: 'v3',
+        auth: await authenticateGoogle(),
+      });
+
       if (!req.file) {
-        return res
-          .status(400)
-          .json({ error: 'Payment proof file is required.' });
+        return res.status(400).json({ error: 'No file uploaded' });
       }
 
+      const folderName = 'Bukti Pembayaran';
+      const folderId = await ensureParentFolderExists(drive, folderName);
+
+      const fileMetadata = {
+        name: req.file.originalname,
+        parents: [folderId],
+      };
+
+      const media = {
+        mimeType: req.file.mimetype,
+        body: bufferToStream(req.file.buffer),
+      };
+
+      const response = await drive.files.create({
+        requestBody: fileMetadata,
+        media,
+        fields: 'id',
+      });
+      imgUrl = await shareFile(drive, response.data.id);
       const payment = await PaymentStatus.create({
         paymentPeriod: paymentPeriod,
         uploadDate: new Date(),
         amount: 150000,
         paymentStatus: 'Pending',
         userId: user.id,
-        fileData: req.file.buffer,
+        fileId: response.data.id,
+        fileUrl: imgUrl,
       });
       res.status(201).json({
         message: 'Bukti pembayaran berhasil diunggah',
@@ -55,33 +64,31 @@ const uploadPaymentProof = async (req, res) => {
           userId: payment.userId,
           amount: payment.amount,
           paymentStatus: payment.PaymentStatus,
+          imageUrl: payment.fileUrl,
         },
       });
     } catch (error) {
-      res.status(500).json({ error: 'Terjadi kesalahan pada server' });
+      next(error);
     }
   });
 };
 
-const getPaymentProofAsBase64 = async (req, res) => {
+const getPaymentProof = async (req, res) => {
   try {
     const { id } = req.params;
 
     const payment = await PaymentStatus.findByPk(id);
 
-    if (!payment || !payment.fileData) {
-      return res.status(404).json({ error: 'Payment proof not found.' });
+    if (!payment || !payment.fileUrl) {
+      return res
+        .status(404)
+        .json({ error: 'Bukti Pembayaran Tidak Ditemukan' });
     }
-
-    const base64File = payment.fileData.toString('base64');
-
-    const mimeType = payment.mimeType || 'application/octet-stream';
 
     res.status(200).json({
       message: 'Success Get Payment',
       data: {
-        mimeType,
-        base64: base64File,
+        imageUrl: payment.fileUrl,
       },
     });
   } catch (error) {
@@ -122,5 +129,5 @@ const updateStatusPayment = async (req, res, next) => {
 module.exports = {
   uploadPaymentProof,
   updateStatusPayment,
-  getPaymentProofAsBase64,
+  getPaymentProof,
 };

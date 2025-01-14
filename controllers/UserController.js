@@ -1,8 +1,6 @@
 const { User, PaymentStatus } = require('../models');
 const { compareHash } = require('../helper/bcrypt');
 const { createToken } = require('../helper/jwt');
-const paymentstatus = require('../models/paymentstatus');
-const { where } = require('sequelize');
 class UserController {
   static async register(req, res, next) {
     const { fullName, username, email, phoneNumber, birthDate, password } =
@@ -74,12 +72,48 @@ class UserController {
 
   static async getAllUserCustomer(req, res, next) {
     try {
+      let { index, limit } = req.body;
+      const totalItems = await User.count({
+        where: {
+          role: 'Customer',
+        },
+      });
+      index = parseInt(index) || 1;
+      limit = parseInt(limit) || totalItems;
+
+      // Hitung offset berdasarkan index dan limit
+      const offset = (index - 1) * limit;
+
       const user = await User.findAll({
         attributes: {
           exclude: ['password', 'createdAt', 'updatedAt'],
         },
         where: {
           role: 'Customer',
+        },
+        limit, // Tetapkan limit untuk membatasi jumlah data
+        offset,
+      });
+      if (!user) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+      res.status(200).json({
+        message: 'Success',
+        total: totalItems,
+        data: user,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+  static async getAllUserAdmin(req, res, next) {
+    try {
+      const user = await User.findAll({
+        attributes: {
+          exclude: ['password', 'createdAt', 'updatedAt'],
+        },
+        where: {
+          role: 'Admin',
         },
       });
       if (!user) {
@@ -102,7 +136,7 @@ class UserController {
       const user = await User.findByPk(userId, {
         include: {
           model: PaymentStatus,
-          attributes: { exclude: ['fileData'] }, // Mengecualikan kolom fileData
+          attributes: { exclude: ['fileData', 'createdAt', 'updatedAt'] }, // Mengecualikan kolom fileData
         },
       });
 
