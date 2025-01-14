@@ -4,8 +4,8 @@ if (process.env.NODE_ENV !== 'production') {
 // console.log(process.env.SECRET_KEY);
 const cors = require('cors');
 const express = require('express');
-const errorHandler = require('./middleware/errorHandle');
-const router = require('./routes');
+const errorHandler = require('../middleware/errorHandle');
+const router = require('../routes');
 const app = express();
 const port = process.env.PORT || 3000;
 
