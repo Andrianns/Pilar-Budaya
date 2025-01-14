@@ -1,10 +1,17 @@
 {
   "development": {
-    "username": "postgres",
-    "password": "postgres",
-    "database": "pilar-budaya",
-    "host": "127.0.0.1",
-    "dialect": "postgres"
+    "username": "neondb_owner",
+    "password": "JU2AuBLgn7Gx",
+    "database": "neondb",
+    "host": "ep-orange-water-a1ur1j7m-pooler.ap-southeast-1.aws.neon.tech",
+    "dialect": "postgres",
+    "dialectOptions": {
+    "ssl": {
+      "require": true,
+      "rejectUnauthorized": false
+    }
+  }
+    
   },
   "test": {
     "username": "root",
@@ -14,10 +21,16 @@
     "dialect": "mysql"
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
+    "username": "neondb_owner",
+    "password": "JU2AuBLgn7Gx",
+    "database": "neondb",
+    "host": "ep-orange-water-a1ur1j7m-pooler.ap-southeast-1.aws.neon.tech",
+    "dialect": "postgres",
+    "dialectOptions": {
+    "ssl": {
+      "require": true,
+      "rejectUnauthorized": false
+    }
+  }
   }
 }
