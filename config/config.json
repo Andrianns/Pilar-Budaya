@@ -21,11 +21,11 @@
     "dialect": "mysql"
   },
   "production": {
-    "username": "neondb_owner",
-    "password": "JU2AuBLgn7Gx",
-    "database": "neondb",
-    "host": "ep-orange-water-a1ur1j7m-pooler.ap-southeast-1.aws.neon.tech",
-    "dialect": "postgres",
+    "username": "${DB_USERNAME}",
+    "password": "${DB_PASSWORD}",
+    "database": "${DB_NAME}",
+    "host": "${DB_HOST}",
+    "dialect": "${DB_DIALECT}",
     "dialectOptions": {
     "ssl": {
       "require": true,

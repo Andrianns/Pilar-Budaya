@@ -1,5 +1,5 @@
 const upload = require('../helper/upload');
-const { User, PaymentStatus, Content } = require('../models');
+const { Content } = require('../models');
 const { shareFile } = require('../helper/util');
 
 const {

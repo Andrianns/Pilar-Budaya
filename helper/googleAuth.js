@@ -1,13 +1,13 @@
-const apiKey = require('../apikey.json'); // File dari Google Cloud Console
+require('dotenv').config();
 const { google } = require('googleapis');
 const { Readable } = require('stream');
 
-const SCOPE = 'https://www.googleapis.com/auth/drive';
+const SCOPE = process.env.SCOPE;
 const authenticateGoogle = async () => {
   const JWTClient = new google.auth.JWT(
-    apiKey.client_email,
+    process.env.CLIENT_EMAIL,
     null,
-    apiKey.private_key,
+    process.env.PRIVATE_KEY,
     SCOPE
   );
 
