@@ -11,31 +11,52 @@ const {
 const uploadPaymentProof = async (req, res, next) => {
   upload(req, res, async (err) => {
     if (err) {
-      return res.status(400).json({ error: err.message });
+      return res.status(400).json({ error: `Upload Error: ${err.message}` });
     }
+
     try {
       const { userId, paymentPeriod } = req.body;
+
+      // Validate input
+      if (!userId || !paymentPeriod) {
+        return res
+          .status(400)
+          .json({ error: 'User ID and payment period are required.' });
+      }
+
       const user = await User.findByPk(userId);
       if (!user) {
-        return res.status(404).json({ error: 'User tidak ditemukan' });
+        return res.status(404).json({ error: 'User not found.' });
+      }
+
+      // Ensure a file is uploaded
+      if (!req.file) {
+        return res
+          .status(400)
+          .json({ error: 'No file uploaded. Please provide a file.' });
       }
 
       const drive = google.drive({
         version: 'v3',
         auth: await authenticateGoogle(),
       });
-      // if (!drive) {
-      //   return res
-      //     .status(500)
-      //     .json({ error: 'Failed to authenticate Google Drive' });
-      // }
-      if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded' });
+
+      if (!drive) {
+        return res
+          .status(500)
+          .json({ error: 'Google Drive authentication failed.' });
       }
 
+      // Ensure the folder exists on Google Drive
       const folderName = 'Bukti Pembayaran';
       const folderId = await ensureParentFolderExists(drive, folderName);
+      if (!folderId) {
+        return res
+          .status(500)
+          .json({ error: 'Failed to find or create folder on Google Drive.' });
+      }
 
+      // Set metadata and file upload properties
       const fileMetadata = {
         name: req.file.originalname,
         parents: [folderId],
@@ -46,17 +67,26 @@ const uploadPaymentProof = async (req, res, next) => {
         body: bufferToStream(req.file.buffer),
       };
 
+      // Upload the file to Google Drive
       const response = await drive.files.create({
         requestBody: fileMetadata,
         media,
         fields: 'id',
       });
-      if (!response) {
-        throw new Error('Failed to upload file to Google Drive');
+
+      if (!response || !response.data || !response.data.id) {
+        throw new Error('Failed to upload file to Google Drive.');
       }
-      imgUrl = await shareFile(drive, response.data.id);
+
+      // Share file and get the file URL
+      const imgUrl = await shareFile(drive, response.data.id);
+      if (!imgUrl) {
+        throw new Error('Failed to generate shareable file URL.');
+      }
+
+      // Create payment status entry in the database
       const payment = await PaymentStatus.create({
-        paymentPeriod: paymentPeriod,
+        paymentPeriod,
         uploadDate: new Date(),
         amount: 150000,
         paymentStatus: 'Pending',
@@ -64,19 +94,36 @@ const uploadPaymentProof = async (req, res, next) => {
         fileId: response.data.id,
         fileUrl: imgUrl,
       });
+
+      if (!payment) {
+        throw new Error('Failed to save payment record in the database.');
+      }
+
+      // Respond with success
       res.status(201).json({
-        message: 'Bukti pembayaran berhasil diunggah',
+        message: 'Bukti pembayaran berhasil diunggah.',
         data: {
           paymentPeriod: payment.paymentPeriod,
           userId: payment.userId,
           amount: payment.amount,
-          paymentStatus: payment.PaymentStatus,
+          paymentStatus: payment.paymentStatus,
           imageUrl: payment.fileUrl,
         },
       });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error: error.message });
+
+      // Handle specific error messages if needed
+      if (error.message.includes('Failed to')) {
+        return res.status(500).json({ error: error.message });
+      }
+
+      // Default error response
+      return res
+        .status(500)
+        .json({
+          error: 'An unexpected error occurred. Please try again later.',
+        });
     }
   });
 };
