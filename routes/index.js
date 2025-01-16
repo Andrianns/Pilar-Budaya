@@ -5,10 +5,10 @@ const paymentRouter = require('./payment');
 const contentRouter = require('./content');
 
 router.use('/user', userRouter);
+router.use(authentication);
 router.use('/payment', paymentRouter);
 router.use('/content', contentRouter);
 
 //authentication
-// router.use(authentication);
 
 module.exports = router;
