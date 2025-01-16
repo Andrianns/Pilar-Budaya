@@ -67,6 +67,12 @@ const uploadPaymentProof = async (req, res, next) => {
         body: bufferToStream(req.file.buffer),
       };
 
+      if (!media) {
+        return res
+          .status(500)
+          .json({ error: 'Failed to convert buffer to stream.' });
+      }
+
       // Upload the file to Google Drive
       const response = await drive.files.create({
         requestBody: fileMetadata,
@@ -119,11 +125,9 @@ const uploadPaymentProof = async (req, res, next) => {
       }
 
       // Default error response
-      return res
-        .status(500)
-        .json({
-          error: 'An unexpected error occurred. Please try again later.',
-        });
+      return res.status(500).json({
+        error: error.message,
+      });
     }
   });
 };
