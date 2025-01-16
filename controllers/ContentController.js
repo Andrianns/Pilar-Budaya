@@ -60,8 +60,7 @@ class ContentController {
           data: content,
         });
       } catch (error) {
-        console.log(error);
-        next(error);
+        return res.status(400).json({ error: error.message });
       }
     });
   }
