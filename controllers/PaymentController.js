@@ -24,7 +24,11 @@ const uploadPaymentProof = async (req, res, next) => {
         version: 'v3',
         auth: await authenticateGoogle(),
       });
-
+      // if (!drive) {
+      //   return res
+      //     .status(500)
+      //     .json({ error: 'Failed to authenticate Google Drive' });
+      // }
       if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
       }
@@ -47,6 +51,9 @@ const uploadPaymentProof = async (req, res, next) => {
         media,
         fields: 'id',
       });
+      if (!response) {
+        throw new Error('Failed to upload file to Google Drive');
+      }
       imgUrl = await shareFile(drive, response.data.id);
       const payment = await PaymentStatus.create({
         paymentPeriod: paymentPeriod,
