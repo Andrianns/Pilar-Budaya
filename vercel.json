@@ -12,6 +12,7 @@
         "dest": "api/app.js"
       }
     ],
-    "installCommand": "npm install pg"
+    "buildCommand": "npm run migrate"
+
   }
   
