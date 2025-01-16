@@ -1,6 +1,6 @@
 const { User, PaymentStatus } = require('../models');
 const { google } = require('googleapis');
-const { upload } = require('../helper/upload');
+const upload = require('../helper/upload');
 const { shareFile } = require('../helper/util');
 const {
   authenticateGoogle,
