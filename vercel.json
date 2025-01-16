@@ -1,5 +1,6 @@
 {
     "version": 2,
+    "buildCommand": "npm run migrate",
     "builds": [
       {
         "src": "api/app.js",
@@ -11,8 +12,6 @@
         "src": "/(.*)",
         "dest": "api/app.js"
       }
-    ],
-    "buildCommand": "npm run migrate"
-
+    ]
   }
   
