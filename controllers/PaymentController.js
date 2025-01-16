@@ -68,7 +68,8 @@ const uploadPaymentProof = async (req, res, next) => {
         },
       });
     } catch (error) {
-      next(error);
+      console.error(error);
+      return res.status(500).json({ error: error.message });
     }
   });
 };
