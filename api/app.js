@@ -8,6 +8,7 @@ const errorHandler = require('../middleware/errorHandle');
 const router = require('../routes');
 const app = express();
 const port = process.env.PORT || 3000;
+console.log('DB_DIALECT:', process.env.DB_DIALECT);
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
