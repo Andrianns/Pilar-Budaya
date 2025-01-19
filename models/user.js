@@ -38,6 +38,11 @@ module.exports = (sequelize, DataTypes) => {
       birthDate: DataTypes.DATE,
       password: DataTypes.STRING,
       role: DataTypes.STRING,
+      isActive: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false, // Set a default value
+        allowNull: false,
+      },
     },
 
     {

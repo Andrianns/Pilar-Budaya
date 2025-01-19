@@ -165,12 +165,21 @@ const updateStatusPayment = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({ error: 'User not found.' });
     }
+
     await PaymentStatus.update(
       {
         paymentStatus: paymentStatus,
       },
       { where: { userId }, individualHooks: true }
     );
+    await User.update(
+      {
+        paymentStatus: paymentStatus,
+        isActive: true,
+      },
+      { where: { userId } }
+    );
+
     findUser = await User.findByPk(+userId, {
       attributes: { exclude: ['createdAt', 'updatedAt', 'password'] },
     });

@@ -25,9 +25,9 @@ function errorHandler(error, req, res, next) {
     error.name === 'JsonWebTokenError'
   ) {
     res.status(401).json({ message: 'Invalid Token' });
-  } else if (error.name === 'teamNotFound') {
-    res.status(404).json({
-      message: 'Team not found',
+  } else if (error.name === 'Your account is not active') {
+    res.status(401).json({
+      message: 'Your account is not active',
     });
   } else if (error.name === 'integer(required)') {
     res.status(404).json({
