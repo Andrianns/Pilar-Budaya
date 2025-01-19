@@ -49,7 +49,7 @@ class UserController {
       if (!findUser) {
         throw { name: 'Invalid email/password' };
       }
-      if (!findUser.isActive) {
+      if (findUser.isActive === false) {
         throw { name: 'Your account is not active' };
       }
       const comparePassword = compareHash(password, findUser.password);
