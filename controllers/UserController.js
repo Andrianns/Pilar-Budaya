@@ -61,8 +61,10 @@ class UserController {
       let username = findUser.username;
       res.status(200).json({
         access_token: access_token,
+        id: findUser.id,
         email,
         username,
+        role: findUser.role,
       });
     } catch (error) {
       console.log(error, '<<<<<from controller error');
@@ -153,6 +155,8 @@ class UserController {
           fullName: user.fullName,
           username: user.username,
           email: user.email,
+          phoneNumber: user.phoneNumber,
+          birthDate: user.birthDate,
           payments: user.PaymentStatuses, // Relasi dengan PaymentStatus
         },
       });
