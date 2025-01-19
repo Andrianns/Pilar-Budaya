@@ -114,16 +114,15 @@ const uploadPaymentProof = async (req, res, next) => {
           amount: payment.amount,
           paymentStatus: payment.paymentStatus,
           imageUrl: payment.fileUrl,
+          uploadDate: payment.createdAt,
         },
       });
     } catch (error) {
       console.error(error);
-
       // Handle specific error messages if needed
       if (error.message.includes('Failed to')) {
         return res.status(500).json({ error: error.message });
       }
-
       // Default error response
       return res.status(500).json({
         error: error.message,

@@ -103,6 +103,23 @@ class ContentController {
       next(error);
     }
   }
+  static async getAllContent(req, res, next) {
+    try {
+      const content = await Content.findAll({
+        attributes: {
+          exclude: ['createdAt', 'updatedAt'],
+        },
+      });
+      if (!content) {
+        throw { name: 'Content not found' };
+      }
+      res.status(200).json({ content: content });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+      // console.log(error);
+      // next(error);
+    }
+  }
 }
 
 module.exports = ContentController;
