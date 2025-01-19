@@ -120,6 +120,48 @@ class ContentController {
       // next(error);
     }
   }
+  static async updateContent(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { contentName, caption } = req.body;
+
+      const content = await Content.findByPk(id);
+
+      if (!content) {
+        throw { name: 'Content not found' };
+      }
+
+      content.contentName = contentName;
+      content.caption = caption;
+
+      await content.save();
+
+      res.status(200).json({ content: content });
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: error.message });
+      next(error);
+    }
+  }
+  static async deleteContent(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const content = await Content.findByPk(id);
+      if (!content) {
+        throw { name: 'Content not found' };
+      }
+      await content.destroy();
+
+      res
+        .status(200)
+        .json({ message: 'Content has been deleted', data: content });
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: error.message });
+      next(error);
+    }
+  }
 }
 
 module.exports = ContentController;
