@@ -10,7 +10,6 @@ const authentication = async (req, res, next) => {
     let payload = verifyToken(access_token);
     // console.log(payload);
     let user = await User.findByPk(payload.id);
-
     if (!user) {
       throw { name: 'Forbidden' };
     }

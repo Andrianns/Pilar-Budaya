@@ -177,7 +177,7 @@ const updateStatusPayment = async (req, res, next) => {
         paymentStatus: paymentStatus,
         isActive: true,
       },
-      { where: { userId } }
+      { where: { id: userId } }
     );
 
     findUser = await User.findByPk(+userId, {
