@@ -1,41 +1,132 @@
 const { User, PaymentStatus } = require('../models');
 const { compareHash } = require('../helper/bcrypt');
 const { createToken } = require('../helper/jwt');
+const { google } = require('googleapis');
+const { shareFile } = require('../helper/util');
+const upload = require('../helper/upload');
+const {
+  authenticateGoogle,
+  bufferToStream,
+  ensureParentFolderExists,
+} = require('../helper/googleAuth');
 class UserController {
   static async register(req, res, next) {
-    const { fullName, username, email, phoneNumber, birthDate, password } =
-      req.body;
-    try {
-      const formattedBirthDate = new Date(birthDate);
-      if (isNaN(formattedBirthDate)) {
-        throw {
-          status: 400,
-          message: 'Invalid birthDate format. Use YYYY-MM-DD.',
-        };
-      }
-      let data = await User.create({
+    upload(req, res, async (err) => {
+      const {
         fullName,
         username,
         email,
         phoneNumber,
         birthDate,
         password,
-        role: 'Customer',
-      });
-      const { role } = data;
-      res.status(201).json({
-        message: 'success register customer',
-        data: {
+        paymentPeriod,
+      } = req.body;
+      try {
+        const formattedBirthDate = new Date(birthDate);
+        if (isNaN(formattedBirthDate)) {
+          throw {
+            status: 400,
+            message: 'Invalid birthDate format. Use YYYY-MM-DD.',
+          };
+        }
+        let data = await User.create({
+          fullName,
           username,
           email,
           phoneNumber,
-          role,
-        },
-      });
-    } catch (error) {
-      console.log(error);
-      next(error);
-    }
+          birthDate,
+          password,
+          role: 'Customer',
+        });
+        const { role } = data;
+        if (!req.file) {
+          return res
+            .status(400)
+            .json({ error: 'No file uploaded. Please provide a file.' });
+        }
+
+        const drive = google.drive({
+          version: 'v3',
+          auth: await authenticateGoogle(),
+        });
+
+        if (!drive) {
+          return res
+            .status(500)
+            .json({ error: 'Google Drive authentication failed.' });
+        }
+
+        // Ensure the folder exists on Google Drive
+        const folderName = 'Bukti Pembayaran';
+        const folderId = await ensureParentFolderExists(drive, folderName);
+        if (!folderId) {
+          return res.status(500).json({
+            error: 'Failed to find or create folder on Google Drive.',
+          });
+        }
+
+        // Set metadata and file upload properties
+        const fileMetadata = {
+          name: req.file.originalname,
+          parents: [folderId],
+        };
+
+        const media = {
+          mimeType: req.file.mimetype,
+          body: bufferToStream(req.file.buffer),
+        };
+
+        if (!media) {
+          return res
+            .status(500)
+            .json({ error: 'Failed to convert buffer to stream.' });
+        }
+
+        // Upload the file to Google Drive
+        const response = await drive.files.create({
+          requestBody: fileMetadata,
+          media,
+          fields: 'id',
+        });
+
+        if (!response || !response.data || !response.data.id) {
+          throw new Error('Failed to upload file to Google Drive.');
+        }
+
+        // Share file and get the file URL
+        const imgUrl = await shareFile(drive, response.data.id);
+        if (!imgUrl) {
+          throw new Error('Failed to generate shareable file URL.');
+        }
+
+        const payment = await PaymentStatus.create({
+          paymentPeriod,
+          uploadDate: new Date(),
+          amount: 150000,
+          paymentStatus: 'Pending',
+          userId: data.id,
+          fileId: response.data.id,
+          fileUrl: imgUrl,
+        });
+
+        if (!payment) {
+          throw new Error('Failed to save payment record in the database.');
+        }
+
+        res.status(201).json({
+          message: 'success register customer',
+          data: {
+            username,
+            email,
+            phoneNumber,
+            role,
+          },
+        });
+      } catch (error) {
+        console.log(error);
+        next(error);
+      }
+    });
   }
 
   static async login(req, res, next) {
