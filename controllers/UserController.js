@@ -230,16 +230,23 @@ class UserController {
       const { userId } = req.params; // Ambil userId dari parameter request
       const { paymentType } = req.body;
       // Query User dengan relasi ke PaymentStatus
+      const includeOptions = {
+        model: PaymentStatus,
+        attributes: { exclude: ['fileData', 'createdAt', 'updatedAt'] },
+        required: false, // Ensure User is included even if no PaymentStatus matches
+      };
+
+      // Add the where condition only if paymentType is provided
+      if (paymentType) {
+        includeOptions.where = {
+          proofPath: paymentType,
+        };
+      }
+
       const user = await User.findByPk(userId, {
-        include: {
-          model: PaymentStatus,
-          attributes: { exclude: ['fileData', 'createdAt', 'updatedAt'] },
-          where: {
-            proofPath: paymentType,
-          },
-          required: false,
-        },
+        include: includeOptions,
       });
+
       // Jika user tidak ditemukan
       if (!user) {
         return res.status(404).json({ error: 'User not found.' });
