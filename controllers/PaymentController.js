@@ -158,7 +158,7 @@ const getPaymentProof = async (req, res) => {
 const updateStatusPayment = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    let { paymentStatus } = req.body;
+    let { paymentStatus, paymentId } = req.body;
 
     const user = await User.findByPk(+userId);
 
@@ -166,11 +166,22 @@ const updateStatusPayment = async (req, res, next) => {
       return res.status(404).json({ error: 'User not found.' });
     }
 
+    const updateOptions = {
+      where: { userId },
+      individualHooks: true,
+    };
+
+    // Tambahkan kondisi `paymentId` jika tersedia
+    if (paymentId) {
+      updateOptions.where.id = paymentId;
+    }
+
+    // Update PaymentStatus (hanya jika paymentId tersedia)
     await PaymentStatus.update(
       {
         paymentStatus: paymentStatus,
       },
-      { where: { userId }, individualHooks: true }
+      updateOptions
     );
     await User.update(
       {
