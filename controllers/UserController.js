@@ -227,8 +227,8 @@ class UserController {
 
   static async getUserById(req, res, next) {
     try {
-      const { userId, paymentType } = req.params; // Ambil userId dari parameter request
-
+      const { userId } = req.params; // Ambil userId dari parameter request
+      const { paymentType } = req.body;
       // Query User dengan relasi ke PaymentStatus
       const user = await User.findByPk(userId, {
         include: {
@@ -258,6 +258,7 @@ class UserController {
         },
       });
     } catch (error) {
+      console.error(error);
       next(error);
     }
   }
