@@ -235,7 +235,7 @@ class UserController {
           model: PaymentStatus,
           attributes: { exclude: ['fileData', 'createdAt', 'updatedAt'] },
           where: {
-            paymentType,
+            proofPath: paymentType,
           },
         },
       });
