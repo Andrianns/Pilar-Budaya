@@ -205,6 +205,17 @@ const updateStatusPayment = async (req, res, next) => {
 
 const dataPendaftar = async (req, res, next) => {
   try {
+    const bulanPembayaran = await PaymentStatus.findAll({
+      where: {
+        proofPath: 'iuran',
+      },
+      attributes: [
+        'paymentPeriod', // Ambil kolom bulan
+      ],
+      group: ['paymentPeriod'], // Grup berdasarkan bulan
+    });
+
+    const bulanList = bulanPembayaran.map((item) => item.paymentPeriod);
     const countTotalUser = await User.count({
       where: {
         role: 'Customer',
@@ -222,49 +233,45 @@ const dataPendaftar = async (req, res, next) => {
     const countTotalBiayaVerifed = 150000 * countTotalUserSuccess;
     const countTotalBiayaNotVerifed =
       countTotalBiayaPendaftar - countTotalBiayaVerifed;
+    // Menghitung data untuk setiap bulan
+    const bulanData = await Promise.all(
+      bulanList.map(async (bulan) => {
+        const countTotalPembayaranIuran = await PaymentStatus.count({
+          where: {
+            proofPath: 'iuran',
+            paymentPeriod: bulan, // Filter berdasarkan bulan
+          },
+        });
 
-    const countTotalPembayaranIuran = await PaymentStatus.count({
-      where: {
-        proofPath: 'iuran',
-      },
-    });
-    const countTotalPembayaranIuranVerifed = await PaymentStatus.count({
-      where: {
-        paymentStatus: 'Success',
-        proofPath: 'iuran',
-      },
-    });
+        const countTotalPembayaranIuranVerifed = await PaymentStatus.count({
+          where: {
+            paymentStatus: 'Success',
+            proofPath: 'iuran',
+            paymentPeriod: bulan, // Filter berdasarkan bulan
+          },
+        });
 
-    const amountTotalIuran = 100000 * countTotalPembayaranIuran;
-    const amountTotalIuranVerified = 100000 * countTotalPembayaranIuranVerifed;
+        const amountTotalIuran = 100000 * countTotalPembayaranIuran;
+        const amountTotalIuranVerified =
+          100000 * countTotalPembayaranIuranVerifed;
 
-    // Mengambil data user selain hanya menghitung
-    const data = await User.findAll({
-      where: {
-        role: 'Customer',
-      },
-      attributes: {
-        exclude: ['password', 'createdAt', 'updatedAt'],
-      },
-    });
-
-    if (!data) {
-      return res.status(404).json({ error: 'Data not found.' });
-    }
-
+        return {
+          totalPembayaranIuran: countTotalPembayaranIuran,
+          totalPembayaranIuranTerverifikasi: countTotalPembayaranIuranVerifed,
+          totalBiayaIuran: amountTotalIuran,
+          totalBiayaIuranTerverifikasi: amountTotalIuranVerified,
+          bulan: bulan, // Menambahkan bulan yang ditemukan secara dinamis
+        };
+      })
+    );
     res.status(200).json({
       message: 'Success',
-      data: {
-        totalAkun: countTotalUser,
-        totalAkunAktif: countTotalUserSuccess,
-        totalBiayaPendaftar: countTotalBiayaPendaftar,
-        totalBiayaPendaftarTerverifikasi: countTotalBiayaVerifed,
-        totalBiayaPendaftarBelumTerverifikasi: countTotalBiayaNotVerifed,
-        totalPembayaranIuran: countTotalPembayaranIuran,
-        totalPembayaranIuranTerverifikasi: countTotalPembayaranIuranVerifed,
-        totalBiayaIuran: amountTotalIuran,
-        totalBiayaIuranTerverifikasi: amountTotalIuranVerified,
-      },
+      totalAkun: countTotalUser,
+      totalAkunAktif: countTotalUserSuccess,
+      totalBiayaPendaftar: countTotalBiayaPendaftar,
+      totalBiayaPendaftarTerverifikasi: countTotalBiayaVerifed,
+      totalBiayaPendaftarBelumTerverifikasi: countTotalBiayaNotVerifed,
+      data: bulanData,
     });
   } catch (error) {
     next(error);
