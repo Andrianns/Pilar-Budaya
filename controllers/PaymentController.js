@@ -203,8 +203,77 @@ const updateStatusPayment = async (req, res, next) => {
   }
 };
 
+const dataPendaftar = async (req, res, next) => {
+  try {
+    const countTotalUser = await User.count({
+      where: {
+        role: 'Customer',
+      },
+    });
+
+    const countTotalUserSuccess = await User.count({
+      where: {
+        role: 'Customer',
+        isActive: true,
+      },
+    });
+
+    const countTotalBiayaPendaftar = 150000 * countTotalUser;
+    const countTotalBiayaVerifed = 150000 * countTotalUserSuccess;
+    const countTotalBiayaNotVerifed =
+      countTotalBiayaPendaftar - countTotalBiayaVerifed;
+
+    const countTotalPembayaranIuran = await PaymentStatus.count({
+      where: {
+        proofPath: 'iuran',
+      },
+    });
+    const countTotalPembayaranIuranVerifed = await PaymentStatus.count({
+      where: {
+        paymentStatus: 'Success',
+        proofPath: 'iuran',
+      },
+    });
+
+    const amountTotalIuran = 100000 * countTotalPembayaranIuran;
+    const amountTotalIuranVerified = 100000 * countTotalPembayaranIuranVerifed;
+
+    // Mengambil data user selain hanya menghitung
+    const data = await User.findAll({
+      where: {
+        role: 'Customer',
+      },
+      attributes: {
+        exclude: ['password', 'createdAt', 'updatedAt'],
+      },
+    });
+
+    if (!data) {
+      return res.status(404).json({ error: 'Data not found.' });
+    }
+
+    res.status(200).json({
+      message: 'Success',
+      data: {
+        totalAkun: countTotalUser,
+        totalAkunAktif: countTotalUserSuccess,
+        totalBiayaPendaftar: countTotalBiayaPendaftar,
+        totalBiayaPendaftarTerverifikasi: countTotalBiayaVerifed,
+        totalBiayaPendaftarBelumTerverifikasi: countTotalBiayaNotVerifed,
+        totalPembayaranIuran: countTotalPembayaranIuran,
+        totalPembayaranIuranTerverifikasi: countTotalPembayaranIuranVerifed,
+        totalBiayaIuran: amountTotalIuran,
+        totalBiayaIuranTerverifikasi: amountTotalIuranVerified,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   uploadPaymentProof,
   updateStatusPayment,
   getPaymentProof,
+  dataPendaftar,
 };

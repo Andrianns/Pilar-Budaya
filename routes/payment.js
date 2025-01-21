@@ -5,7 +5,7 @@ const router = require('express').Router();
 router.put('/:userId', PaymentController.updateStatusPayment);
 router.post('/upload-payment', PaymentController.uploadPaymentProof);
 router.get('/get-payment/:id', PaymentController.getPaymentProof);
-
+router.get('/dataPendaftar', PaymentController.dataPendaftar);
 module.exports = router;
 
 // const PaymentController = require('../controllers/PaymentController');
