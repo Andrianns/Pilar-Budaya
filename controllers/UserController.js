@@ -237,6 +237,7 @@ class UserController {
           where: {
             proofPath: paymentType,
           },
+          required: false,
         },
       });
       // Jika user tidak ditemukan
