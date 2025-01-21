@@ -107,6 +107,7 @@ class UserController {
           userId: data.id,
           fileId: response.data.id,
           fileUrl: imgUrl,
+          proofPath: 'pendaftaran',
         });
 
         if (!payment) {
@@ -226,16 +227,18 @@ class UserController {
 
   static async getUserById(req, res, next) {
     try {
-      const { userId } = req.params; // Ambil userId dari parameter request
+      const { userId, paymentType } = req.params; // Ambil userId dari parameter request
 
       // Query User dengan relasi ke PaymentStatus
       const user = await User.findByPk(userId, {
         include: {
           model: PaymentStatus,
-          attributes: { exclude: ['fileData', 'createdAt', 'updatedAt'] }, // Mengecualikan kolom fileData
+          attributes: { exclude: ['fileData', 'createdAt', 'updatedAt'] },
+          where: {
+            paymentType,
+          },
         },
       });
-
       // Jika user tidak ditemukan
       if (!user) {
         return res.status(404).json({ error: 'User not found.' });
@@ -255,7 +258,6 @@ class UserController {
         },
       });
     } catch (error) {
-      console.error(error);
       next(error);
     }
   }

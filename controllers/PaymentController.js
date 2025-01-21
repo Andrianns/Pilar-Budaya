@@ -94,11 +94,12 @@ const uploadPaymentProof = async (req, res, next) => {
       const payment = await PaymentStatus.create({
         paymentPeriod,
         uploadDate: new Date(),
-        amount: 150000,
+        amount: 100000,
         paymentStatus: 'Pending',
         userId: user.id,
         fileId: response.data.id,
         fileUrl: imgUrl,
+        proofPath: 'iuran',
       });
 
       if (!payment) {
@@ -118,7 +119,6 @@ const uploadPaymentProof = async (req, res, next) => {
         },
       });
     } catch (error) {
-      console.error(error);
       // Handle specific error messages if needed
       if (error.message.includes('Failed to')) {
         return res.status(500).json({ error: error.message });
@@ -187,7 +187,6 @@ const updateStatusPayment = async (req, res, next) => {
     res.status(200).json({
       message: `Successfully updated user ${findUser.fullName}`,
     });
-    // Response data
   } catch (error) {
     next(error);
   }
