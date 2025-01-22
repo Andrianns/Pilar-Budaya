@@ -28,8 +28,7 @@ class ContentController {
 
         // page '1' = Pelatih
         // page '2' = Galery Sanggar
-        const folderName =
-          page === '1' || page === '2' ? 'Pelatih' : 'Galery Sanggar';
+        const folderName = page === '1' ? 'Pelatih' : 'Galery Sanggar';
 
         const folderId = await ensureParentFolderExists(drive, folderName);
 
